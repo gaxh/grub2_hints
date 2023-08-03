@@ -1,0 +1,176 @@
+1. install windows 7 into vhd file
+
+1.1. boot windows pe
+
+1.2. create vdisk file by
+    diskpart
+        create vdisk file="c:\win7.vhd" maximum=38000 type=expandable
+        attach vdisk
+
+1.3. extract or install windows 7 into vhd
+
+2. install grub2 into hard disk
+
+2.1. boot linux live-cd
+
+2.2. install grub2 by
+    sudo mount /dev/sda1 m
+    sudo grub-install --boot-directory=m/boot/ /dev/sda
+
+2.3. copy syslinux memdisk to grub directory
+    find "memdisk" file from live-cd os, and copy it under m/boot/grub/syslinux/
+
+3. grub boot ubuntu iso
+
+grub.cfg code begin
+
+function fish_boot_ubuntu_iso {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	loopback loop ($targetdev1)$targetfile1
+	linux (loop)/casper/vmlinuz boot=casper iso-scan/filename=$targetfile1 noprompt noeject nomodeset noapic noacpi nosplash irqpoll toram
+	initrd (loop)/casper/initrd.lz
+}
+
+menuentry "linuxmint 20.3 iso" {
+	fish_boot_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
+}
+
+grub.cfg code end
+
+4. grub boot windows pe iso
+
+grub.cfg code begin
+
+function fish_boot_dos_iso {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	linux16 $prefix/syslinux/memdisk iso raw
+	initrd16 ($targetdev1)$targetfile1
+}
+
+menuentry "pe10 iso" {
+	fish_boot_dos_iso /winpe/pe10.iso
+}
+
+grub.cfg code end
+
+5. make windows bootmgr vhd
+
+5.1. boot windows pe
+
+5.2. create vdisk file by
+    diskpart
+        create vdisk file="c:\win7boot.vhd" maximum=30 type=fixed
+        attach vdisk
+
+5.3. attach windows vhd
+
+5.4. make boot data in boot vhd
+
+assume boot vhd attached as partition F, windows vhd attached as partition G
+    bcdboot g:\windows /s f:
+
+5.5. detach windows vhd
+
+5.6. modify BCD entries by
+    bcdedit /store f:\Boot\BCD /set {default} device vhd=[C:]\win7.vhd
+    bcdedit /store f:\Boot\BCD /set {default} osdevice vhd=[C:]\win7.vhd
+
+6. grub boot windows bootmgr vhd
+
+grub.cfg code begin
+
+function fish_boot_windows_bootmgr_vhd {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	linux16 $prefix/syslinux/memdisk harddisk raw
+	initrd16 ($targetdev1)$targetfile1
+}
+
+menuentry "windows" {
+	fish_boot_windows_bootmgr_vhd /7boot.vhd
+}
+
+grub.cfg code end
+
+
+
+last. full grub.cfg example
+
+function fish_boot_ubuntu_iso {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	loopback loop ($targetdev1)$targetfile1
+	linux (loop)/casper/vmlinuz boot=casper iso-scan/filename=$targetfile1 noprompt noeject nomodeset noapic noacpi nosplash irqpoll toram
+	initrd (loop)/casper/initrd.lz
+}
+
+function fish_boot_dos_iso {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	linux16 $prefix/syslinux/memdisk iso raw
+	initrd16 ($targetdev1)$targetfile1
+}
+
+function fish_boot_windows_bootmgr_vhd {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	linux16 $prefix/syslinux/memdisk harddisk raw
+	initrd16 ($targetdev1)$targetfile1
+}
+
+menuentry "linuxmint 20.3 iso" {
+	fish_boot_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
+}
+
+menuentry "pe10 iso" {
+	fish_boot_dos_iso /winpe/pe10.iso
+}
+
+menuentry "windows" {
+	fish_boot_windows_bootmgr_vhd /7boot.vhd
+}
+
