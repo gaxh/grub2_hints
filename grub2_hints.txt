@@ -24,7 +24,7 @@
 
 grub.cfg code begin
 
-function fish_boot_ubuntu_iso {
+function fish_boot_linux_iso_loopback {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -40,7 +40,7 @@ function fish_boot_ubuntu_iso {
 }
 
 menuentry "linuxmint 20.3 iso" {
-	fish_boot_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
+	fish_boot_linux_iso_loopback /linuxmint/linuxmint-20.3-xfce-64bit.iso
 }
 
 grub.cfg code end
@@ -49,7 +49,7 @@ grub.cfg code end
 
 grub.cfg code begin
 
-function fish_boot_dos_iso {
+function fish_boot_memdisk_iso_raw {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -64,7 +64,7 @@ function fish_boot_dos_iso {
 }
 
 menuentry "pe10 iso" {
-	fish_boot_dos_iso /winpe/pe10.iso
+	fish_boot_memdisk_iso_raw /winpe/pe10.iso
 }
 
 grub.cfg code end
@@ -96,7 +96,7 @@ assume boot vhd attached as partition F, windows vhd attached as partition G
 
 grub.cfg code begin
 
-function fish_boot_windows_bootmgr_vhd {
+function fish_boot_memdisk_harddisk_raw {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -111,7 +111,7 @@ function fish_boot_windows_bootmgr_vhd {
 }
 
 menuentry "windows" {
-	fish_boot_windows_bootmgr_vhd /7boot.vhd
+	fish_boot_memdisk_harddisk_raw /7boot.vhd
 }
 
 grub.cfg code end
@@ -120,7 +120,7 @@ grub.cfg code end
 
 last. full grub.cfg example
 
-function fish_boot_ubuntu_iso {
+function fish_boot_linux_iso_loopback {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -135,7 +135,7 @@ function fish_boot_ubuntu_iso {
 	initrd (loop)/casper/initrd.lz
 }
 
-function fish_boot_dos_iso {
+function fish_boot_memdisk_iso_raw {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -149,7 +149,7 @@ function fish_boot_dos_iso {
 	initrd16 ($targetdev1)$targetfile1
 }
 
-function fish_boot_windows_bootmgr_vhd {
+function fish_boot_memdisk_harddisk_raw {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -164,14 +164,16 @@ function fish_boot_windows_bootmgr_vhd {
 }
 
 menuentry "linuxmint 20.3 iso" {
-	fish_boot_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
+	fish_boot_linux_iso_loopback /linuxmint/linuxmint-20.3-xfce-64bit.iso
 }
 
 menuentry "pe10 iso" {
-	fish_boot_dos_iso /winpe/pe10.iso
+	fish_boot_memdisk_iso_raw /winpe/pe10.iso
 }
 
 menuentry "windows" {
-	fish_boot_windows_bootmgr_vhd /7boot.vhd
+	fish_boot_memdisk_harddisk_raw /7boot.vhd
 }
+
+
 
