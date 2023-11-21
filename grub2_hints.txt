@@ -91,9 +91,9 @@ assume boot vhd attached as partition F, windows vhd attached as partition G
     bcdedit /store f:\Boot\BCD /set {default} device vhd=[C:]\win7.vhd
     bcdedit /store f:\Boot\BCD /set {default} osdevice vhd=[C:]\win7.vhd
 
-5.*. some windows version (eg. windows 10 ltsc 2019) can NOT boot by
+5.*. some windows version (eg. windows 10 ltsc 2019) can NOT setup by
     "fake boot vhd" mounted by syslinux memdisk, as windows MAY try to
-    access system partition and modify BCD configs
+    access system partition and modify BCD configs during setup (first-time boot)
 
 6. grub boot windows bootmgr vhd
 
