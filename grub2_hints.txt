@@ -119,7 +119,36 @@ menuentry "windows" {
 
 grub.cfg code end
 
+7. grub boot windows real boot partition
 
+grub.cfg code begin
+
+function fish_boot_windows_bootmgr_label {
+	set targetfile1="/bootmgr"
+	set label1="$@"
+	search --label --set targetdev1 $label1
+	if [ $? -ne 0 ]; then
+		echo "partition label NOT found: " $label1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	set root=$targetdev1
+	ntldr $targetfile1
+}
+
+menuentry "windows 10 real boot" {
+	fish_boot_windows_bootmgr_label realboot10
+}
+
+grub.cfg code end
 
 last. full grub.cfg example
 
@@ -164,6 +193,27 @@ function fish_boot_memdisk_harddisk_raw {
 	echo "file found: ($targetdev1)$targetfile1"
 	linux16 $prefix/syslinux/memdisk harddisk raw
 	initrd16 ($targetdev1)$targetfile1
+}
+
+function fish_boot_windows_bootmgr_label {
+	set targetfile1="/bootmgr"
+	set label1="$@"
+	search --label --set targetdev1 $label1
+	if [ $? -ne 0 ]; then
+		echo "partition label NOT found: " $label1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	set root=$targetdev1
+	ntldr $targetfile1
 }
 
 menuentry "linuxmint 20.3 iso" {
