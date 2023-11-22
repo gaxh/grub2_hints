@@ -23,7 +23,7 @@
 
 grub.cfg code begin
 
-function fish_boot_loopback_linux_iso {
+function fish_boot_loopback_ubuntu_iso {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -39,7 +39,7 @@ function fish_boot_loopback_linux_iso {
 }
 
 menuentry "linuxmint 20.3 iso" {
-	fish_boot_loopback_linux_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
+	fish_boot_loopback_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
 }
 
 grub.cfg code end
@@ -123,7 +123,7 @@ grub.cfg code end
 
 last. full grub.cfg example
 
-function fish_boot_loopback_linux_iso {
+function fish_boot_loopback_ubuntu_iso {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
 	if ! [ -s "($targetdev1)$targetfile1" ]; then
@@ -167,7 +167,7 @@ function fish_boot_memdisk_harddisk_raw {
 }
 
 menuentry "linuxmint 20.3 iso" {
-	fish_boot_loopback_linux_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
+	fish_boot_loopback_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
 }
 
 menuentry "pe10 iso" {
