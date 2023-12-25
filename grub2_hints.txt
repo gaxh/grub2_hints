@@ -216,6 +216,23 @@ function fish_boot_windows_bootmgr_label {
 	ntldr $targetfile1
 }
 
+function fish_boot_loopback_ubuntu_diskimg {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	probe --set targetdevuuid1 --fs-uuid ($targetdev1)
+	loopback loop0 ($targetdev1)$targetfile1
+	set root=(loop0)
+	linux /boot/vmlinuz root=UUID=$targetdevuuid1 loop=$targetfile1 rw verbose nosplash
+	initrd /boot/initrd.img
+}
+
 menuentry "linuxmint 20.3 iso" {
 	fish_boot_loopback_ubuntu_iso /linuxmint/linuxmint-20.3-xfce-64bit.iso
 }
