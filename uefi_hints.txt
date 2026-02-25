@@ -1,0 +1,57 @@
+磁盘分区
+- 系统盘必须是gpt
+-- diskpart下，使用 convert gpt
+- 至少分配一个efi分区
+-- diskpart下
+--- create partition efi size=XXX
+--- format quick fs=fat32 label=efi
+- 和legacy bios一样，还需要分配ext4和ntfs分区
+
+安装grub - uefi模式
+- 进入linux livecd
+- 假设 efi分区是 sda1，ext4分区是 sda2
+-- mount /dev/sda1 m_efi
+-- mount /dev/sda2 m_linux
+-- grub-install --target=x86_64-efi --efi-directory=m_efi --boot-directory=m_linux/boot --bootloader-id=GRUB
+- 如果没有出错，现在可以尝试重启pc，看看能否进入grub
+
+grub - 启动ubuntu镜像代码
+function fish_uefi_boot_loopback_ubuntu_diskimg {
+	set targetfile1="$@"
+	search --file --set targetdev1 $targetfile1
+	if ! [ -s "($targetdev1)$targetfile1" ]; then
+		echo "file NOT found: " $targetfile1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	probe --set targetdevuuid1 --fs-uuid ($targetdev1)
+	loopback loop0 ($targetdev1)$targetfile1
+	set root=(loop0)
+	set vmlinuzfile=(loop0)/casper/vmlinuz
+	if ! [ -s "$vmlinuzfile" ]; then
+		echo "file NOT found: " $vmlinuzfile
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	set initrdfile=
+	set possible_initrd_files="initrd.lz initrd"
+	for item in $possible_initrd_files; do
+		if [ -s (loop0)/casper/$item ]; then
+			initrdfile=(loop0)/casper/$item
+			break
+		fi
+	done
+	if [ -z $initrdfile ]; then
+		echo "file NOT found: " (loop0)/casper/initrd(.*)
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	linux $vmlinuzfile boot=casper iso-scan/filename=$targetfile1 rw verbose nosplash
+	initrd $initrdfile
+}
+
+
