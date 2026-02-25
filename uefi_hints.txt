@@ -84,4 +84,15 @@ function fish_uefi_chainload_windows {
 -- label1 为分区的label
 -- efi1 为 /EFI/Boot/bootx64.efi
 
+grub - 启动windows 10 vhdx
+- 安装windows 10 vhdx
+-- 需要有 EFI 分区。假设为 S:
+-- 需要有 ntfs 分区，放 vhdx 文件
+-- 创建 vhdx 文件，内部创建分区，假设为 V:
+-- 用 dism 解压 wim 文件到 vhdx 内部分区
+-- 创建启动文件
+--- bcdboot V:\windows /s S: /f UEFI
+- 重启，选择windows启动项，即可进入windows
+
+
 
