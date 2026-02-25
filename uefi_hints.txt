@@ -15,7 +15,9 @@
 -- grub-install --target=x86_64-efi --efi-directory=m_efi --boot-directory=m_linux/boot --bootloader-id=GRUB
 - 如果没有出错，现在可以尝试重启pc，看看能否进入grub
 
-grub - 启动ubuntu镜像代码
+grub - 启动ubuntu livecd
+- 将ubuntu iso文件拷贝到ext4分区
+- 使用以下的代码
 function fish_uefi_boot_loopback_ubuntu_diskimg {
 	set targetfile1="$@"
 	search --file --set targetdev1 $targetfile1
@@ -53,5 +55,33 @@ function fish_uefi_boot_loopback_ubuntu_diskimg {
 	linux $vmlinuzfile boot=casper iso-scan/filename=$targetfile1 rw verbose nosplash
 	initrd $initrdfile
 }
+
+grub - 启动windows pe
+- 新建fat32分区
+-- 将windows pe iso里面的所有文件，拷贝到fat32分区根目录下
+- 使用以下的代码
+function fish_uefi_chainload_windows {
+	set label1="$1"
+	set efi1="$2"
+	search --label --set targetdev1 $label1
+	if [ $? -ne 0 ]; then
+		echo "partition label NOT found: " $label1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	if ! [ -s "($targetdev1)$efi1" ]; then
+		echo "file NOT found: " $efi1
+		echo "press any key to shutdown"
+		read
+		halt
+	fi
+	echo "file found: ($targetdev1)$targetfile1"
+	set root=$targetdev1
+	chainloader $efi1
+}
+- 对于windows pe来说
+-- label1 为分区的label
+-- efi1 为 /EFI/Boot/bootx64.efi
 
 
