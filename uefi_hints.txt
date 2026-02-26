@@ -81,7 +81,7 @@ function fish_uefi_chainload_windows {
 	chainloader $efi1
 }
 - 对于windows pe来说
--- label1 为分区的label
+-- label1 为pe iso解压到的fat32分区的label
 -- efi1 为 /EFI/Boot/bootx64.efi
 
 grub - 启动windows 10 vhdx
@@ -93,6 +93,8 @@ grub - 启动windows 10 vhdx
 -- 创建启动文件
 --- bcdboot V:\windows /s S: /f UEFI
 - 重启，选择windows启动项，即可进入windows
-
+- 对于windows来说
+-- label1 为 EFI 分区的label
+-- efi1 为 /EFI/Microsoft/Boot/bootmgfw.efi
 
 
